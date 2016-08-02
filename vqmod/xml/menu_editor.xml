@@ -1,0 +1,54 @@
+<modification>
+    <id>Menu Editor</id>
+    <version>1.0</version>
+    <vqmver>2.X</vqmver>
+    <author>gun88</author>
+    <file path="catalog/controller/common/" name="header.php">
+        <operation info="Menu Editor">
+            <search position="before"><![CDATA[return $this->load->view('common/header', $data);]]></search>
+            <add><![CDATA[
+        // gun88
+        if ($this->config->get('menu_editor_enabled') == 1) {
+            $pre_menu = array();
+            $post_menu = array();
+            $menu_editor_entries = $this->config->get('menu_editor_entries');
+            
+            foreach ($menu_editor_entries as $menu_editor_entry) {
+                if ($menu_editor_entry['position'] == 0) {
+                    $pre_menu[] = array('name' => $menu_editor_entry['names'][$this->config->get('config_language_id')],
+                        'children' => array(),
+                        'column' => 1,
+                        'href' => $menu_editor_entry['href'],
+                        'target' => $menu_editor_entry['target']);
+                } else {
+                    $post_menu[] = array('name' => $menu_editor_entry['names'][$this->config->get('config_language_id')],
+                        'children' => array(),
+                        'column' => 1,
+                        'href' => $menu_editor_entry['href'],
+                        'target' => $menu_editor_entry['target']);
+                }
+               
+            }
+            $data['categories'] = array_merge($pre_menu, $data['categories'], $post_menu);
+            
+            
+        }
+        // end gun88
+                ]]>
+            </add>
+        </operation>        
+    </file>
+    <file path="catalog/view/theme/*/template/common/" name="header.tpl">
+        <operation info="Menu Editor">
+            <search position="replace"><![CDATA[<li><a href="<?php echo $category['href']; ?>"><?php echo $category['name']; ?></a></li>]]></search>
+            <add><![CDATA[
+                <?php if (isset($category['target']) && trim($category['target'])!= "") { ?>
+                <li><a href="<?php echo $category['href']; ?>" target="<?php echo $category['target']; ?>"><?php echo $category['name']; ?></a></li>
+                <?php } else { ?>
+                <li><a href="<?php echo $category['href']; ?>"><?php echo $category['name']; ?></a></li>
+                <?php } ?>
+ ]]>
+            </add>
+        </operation>                
+    </file>
+</modification>
