@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>PDF Invoice Lite</id>
+  <name>PDF Invoice Lite</name>
+  <code>pdf_invoice_lite</code>
+	<version>2.6.2</version>
+	<vqmver>2.4.0</vqmver>
+	<author>Sirius-dev</author>
+  <link></link>
+	
+	<file path="catalog/controller/account/order.php">
+		<operation>
+			<search position="after"><![CDATA[public function index() {]]></search>
+			<add position="after"><![CDATA[
+			$this->language->load('module/pdf_invoice');
+			if (substr(VERSION, 0, 1) == 2) {
+				$data['button_pdfinv_invoice'] = $this->language->get('text_pdf_invoice');
+				$data['pdf_invoice_invoiced'] = $this->config->get('pdf_invoice_invoiced');
+				$data['pdf_invoice_icon'] = $this->config->get('pdf_invoice_icon');
+			} else {
+				$this->data['button_pdfinv_invoice'] = $this->language->get('text_pdf_invoice');
+				$this->data['pdf_invoice_invoiced'] = $this->config->get('pdf_invoice_invoiced');
+				$this->data['pdf_invoice_icon'] = $this->config->get('pdf_invoice_icon');
+			}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[public function info() {]]></search>
+			<add position="after"><![CDATA[
+			$this->language->load('module/pdf_invoice');
+			if (substr(VERSION, 0, 1) == 2) {
+				$data['button_pdfinv_invoice'] = $this->language->get('text_pdf_invoice');
+				$data['link_pdfinv_invoice'] = $this->url->link('account/order/info', 'order_id=' . (int) $this->request->get['order_id'] . '&pdf=1', 'SSL');
+				$data['pdf_invoice_invoiced'] = $this->config->get('pdf_invoice_invoiced');
+				$data['pdf_invoice_icon'] = $this->config->get('pdf_invoice_icon');
+			} else {
+				$this->data['button_pdfinv_invoice'] = $this->language->get('text_pdf_invoice');
+				$this->data['link_pdfinv_invoice'] = $this->url->link('account/order/info', 'order_id=' . (int) $this->request->get['order_id'] . '&pdf=1', 'SSL');
+				$this->data['pdf_invoice_invoiced'] = $this->config->get('pdf_invoice_invoiced');
+				$this->data['pdf_invoice_icon'] = $this->config->get('pdf_invoice_icon');
+			}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA['order_id'   => $result['order_id'],]]></search>
+			<add position="after"><![CDATA[
+				'invoice_no'   => $result['invoice_no'],
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA['order_id'   => $result['order_id'],]]></search>
+			<add position="after"><![CDATA[
+			'pdf_href'       => $this->url->link('account/order/info', 'order_id=' . $result['order_id'] . '&pdf=1', 'SSL'),
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after" offset="1"><![CDATA[if ($order_info) {]]></search>
+			<add position="after" offset="1"><![CDATA[
+			if(isset($this->request->get['pdf']))
+			{
+				$this->load->model('tool/pdf_invoice');
+				$this->model_tool_pdf_invoice->generate($order_id, 'display', 'invoice');
+			}
+			]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/model/account/order.php">
+		<operation>
+			<search position="replace"><![CDATA[SELECT o.order_id,]]></search>
+			<add position="replace"><![CDATA[SELECT o.order_id, o.invoice_no,]]></add>
+		</operation>
+	</file>
+	
+  <!-- openbay -->
+	<file path="catalog/model/openbay/ebay_order.php" error="skip">
+    <operation>
+			<search position="replace" index="1"><![CDATA[$mail->send();]]></search>
+			<add position="replace"><![CDATA[
+				$this->load->model('tool/pdf_invoice');
+
+				if ($this->config->get('pdf_invoice_mail') || in_array($order_status_id, (array) $this->config->get('pdf_invoice_auto_notify'))){
+					$temp_pdf = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice');
+					$mail->addAttachment($temp_pdf);
+				}
+				
+			  $mail->send();
+			
+				if(isset($temp_pdf) && is_file($temp_pdf)){
+					unlink($temp_pdf);
+				}
+			]]></add>
+		</operation>
+    
+		<operation>
+			<search position="replace" index="2"><![CDATA[$mail->send();]]></search>
+			<add position="replace"><![CDATA[
+				if(in_array($order_status_id, (array) $this->config->get('pdf_invoice_auto_notify'))) {
+					$this->load->model('tool/pdf_invoice');
+					$temp_pdf = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice');
+					$mail->addAttachment($temp_pdf);
+				}
+				
+				$mail->send();
+				
+				if (isset($temp_pdf) && is_file($temp_pdf)) {
+					unlink($temp_pdf);
+				}
+			]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/model/checkout/order.php">
+		<operation>
+			<search position="replace" index="1"><![CDATA[$mail->send();]]></search>
+			<add position="replace"><![CDATA[
+				$this->load->model('tool/pdf_invoice');
+				
+					if ($this->config->get('pdf_invoice_mail') || in_array($order_status_id, (array) $this->config->get('pdf_invoice_auto_notify'))){
+						$temp_pdf = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice');
+						$mail->addAttachment($temp_pdf);
+					}
+					
+				$mail->send();
+				
+				if(isset($temp_pdf) && is_file($temp_pdf)){
+					unlink($temp_pdf);
+				}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="replace" index="4"><![CDATA[$mail->send();]]></search>
+			<add position="replace"><![CDATA[
+				if (in_array($order_status_id, (array) $this->config->get('pdf_invoice_auto_notify'))) {
+					$this->load->model('tool/pdf_invoice');
+					$temp_pdf = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice');
+					$mail->addAttachment($temp_pdf);
+				}
+				
+				$mail->send();
+				
+				if (isset($temp_pdf) && is_file($temp_pdf)) {
+					unlink($temp_pdf);
+				}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[$mail->setTo($this->config->get('config_email'));]]></search>
+			<add position="after"><![CDATA[
+				if ($this->config->get('pdf_invoice_admincopy')){
+					$temp_pdf_admin = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice', $this->config->get('pdf_invoice_adminlang'));
+					$mail->addAttachment($temp_pdf_admin);
+				}
+				
+				if ($this->config->get('pdf_invoice_adminalertcopy')){
+					$mail->setHtml($html);
+				}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after" offset="5"><![CDATA[foreach ($emails as $email) {]]></search>
+			<add position="after" offset="5"><![CDATA[
+				if (isset($temp_pdf_admin) && is_file($temp_pdf_admin)){
+					unlink($temp_pdf_admin);
+				}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[=> $order_query->row['customer_id'],]]></search>
+			<add position="after"><![CDATA[
+				'customer_group_id'            => $order_query->row['customer_group_id'],
+			]]></add>
+		</operation>
+		<operation>
+			<search position="before" index="2"><![CDATA[$mail = new Mail(]]></search>
+			<add position="before"><![CDATA[
+				} // end copy mail for admin
+			]]></add>
+		</operation>
+		<!-- copy mail for admin -->
+		<operation error="skip" v="2.0">
+			<search position="after" offset="2"><![CDATA[if ($this->config->get('config_order_mail')) {]]></search>
+			<add position="after" offset="2"><![CDATA[
+				if (!$this->config->get('pdf_invoice_adminalertcopy')) {  // start copy mail for admin
+			]]></add>
+		</operation>
+    <operation error="skip" v="1.5">
+			<search position="after" offset="2"><![CDATA[if ($this->config->get('config_alert_mail')) {]]></search>
+			<add position="after" offset="2"><![CDATA[
+				if (!$this->config->get('pdf_invoice_adminalertcopy')) {  // start copy mail for admin
+			]]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/view/template/sale/order_info.tpl">
+    <operation error="skip" v="2.0">
+			<search position="replace"><![CDATA[<div class="pull-right"><a href="<?php echo $invoice; ?>"]]></search>
+			<add position="replace"><![CDATA[<div class="pull-right"><a href="<?php echo $link_pdfinv_invoice; ?>" target="_blank" data-toggle="tooltip" title="<?php echo $button_pdfinv_invoice; ?>" class="btn btn-warning"><i class="fa fa-file-pdf-o"></i></a> <a href="<?php echo $invoice; ?>"]]></add>
+		</operation>		
+    <operation error="skip" v="1.5">
+			<search position="replace"><![CDATA[<div class="buttons">]]></search>
+			<add position="replace"><![CDATA[<div class="buttons"><a href="<?php echo $link_pdfinv_invoice; ?>" target="_blank" class="button"><img src="view/pdf_invoice_pro/img/icon.png" style="vertical-align:top;padding-right:4px"/> <?php echo $button_pdfinv_invoice; ?></a>]]></add>
+		</operation>
+		
+		
+	</file>
+	
+	<file path="admin/view/template/sale/order_list.tpl">
+		<operation error="skip" v="2.0">
+			<search position="before"><![CDATA[<button type="submit" id="button-shipping"]]></search>
+			<add position="before"><![CDATA[
+				<button type="submit" id="btn-pdfinv-invoice" form="form-order" formaction="<?php echo $link_pdfinv_invoice; ?>" data-toggle="tooltip" title="<?php echo $button_pdfinv_invoice; ?>" class="btn btn-warning"><i class="fa fa-file-pdf-o"></i></button>
+				]]></add>
+		</operation>
+		<operation error="skip" v="2.0">
+			<search position="after"><![CDATA[$('#button-shipping, #button-invoice').prop('disabled', true);]]></search>
+			<add position="after"><![CDATA[$('#btn-pdfinv-invoice').prop('disabled', true);]]></add>
+		</operation>
+		<operation error="skip" v="2.0">
+			<search position="after"><![CDATA[$('#button-invoice').prop('disabled', false);]]></search>
+			<add position="after"><![CDATA[$('#btn-pdfinv-invoice').prop('disabled', false);]]></add>
+		</operation>
+    <operation error="skip" v="1.5">
+			<search position="replace"><![CDATA[<div class="buttons">]]></search>
+			<add position="replace"><![CDATA[<div class="buttons"><a onclick="if(!$('#form :checkbox:checked').length) return alert('Select at least one checkbox'); $('#form').attr('action', '<?php echo $link_pdfinv_invoice; ?>'); $('#form').attr('target', '_blank'); $('#form').submit();" class="button"><img src="view/pdf_invoice_pro/img/icon.png" style="vertical-align:top;padding-right:4px"/> <?php echo $button_pdfinv_invoice; ?></a>]]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/controller/sale/order.php">
+		<operation>
+			<search position="after"><![CDATA[public function index() {]]></search>
+			<add position="after"><![CDATA[		$this->language->load('module/pdf_invoice_lite');]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[function getList() {]]></search>
+			<add position="after"><![CDATA[
+		if (substr(VERSION, 0, 1) == 2) {
+			$data['button_pdfinv_invoice'] = $this->language->get('button_pdf_invoice');
+			$data['link_pdfinv_invoice'] = $this->url->link('sale/order/pdf_invoice', 'token=' . $this->session->data['token'], 'SSL');
+		} else {
+			$this->data['button_pdfinv_invoice'] = $this->language->get('button_pdf_invoice');
+			$this->data['link_pdfinv_invoice'] = $this->url->link('sale/order/pdf_invoice', 'token=' . $this->session->data['token'], 'SSL');
+		}
+			]]></add>
+		</operation>
+		<operation>
+			<search position="after"><![CDATA[public function info() {]]></search>
+			<add position="after"><![CDATA[
+			$this->language->load('module/pdf_invoice_lite');
+			if (substr(VERSION, 0, 1) == 2) {
+				$data['pdfinv_ocv2'] = true;
+				
+				// buttons
+				$data['button_pdfinv_invoice'] = $this->language->get('button_pdf_invoice');
+				$data['link_pdfinv_invoice'] = $this->url->link('sale/order/pdf_invoice', 'token=' . $this->session->data['token'] . '&order_id=' . (int)$this->request->get['order_id'], 'SSL');
+			} else {
+				$this->data['pdfinv_ocv2'] = false;
+				
+				// buttons
+				$this->data['button_pdfinv_invoice'] = $this->language->get('button_pdf_invoice');
+				$this->data['link_pdfinv_invoice'] = $this->url->link('sale/order/pdf_invoice', 'token=' . $this->session->data['token'] . '&order_id=' . (int)$this->request->get['order_id'], 'SSL');
+			}	
+			]]></add>
+		</operation>
+		<operation>
+			<search position="before"><![CDATA[public function invoice() {]]></search>
+			<add position="before"><![CDATA[
+	public function pdf_invoice() {
+		$orders = array();
+
+		if (isset($this->request->post['selected'])) {
+			$orders = $this->request->post['selected'];
+		} elseif (isset($this->request->get['order_id'])) {
+			$orders[] = $this->request->get['order_id'];
+		}
+				
+		$this->load->model('tool/pdf_invoice');
+		$this->response->setOutput($this->model_tool_pdf_invoice->generate($orders, 'display', 'invoice', $this->config->get('pdf_invoice_adminlang')));
+	}
+			]]></add>
+		</operation>
+	</file>
+	
+	<!--attach invoice on order update (1.5 only, in c/m/c/o for v2)-->
+	<file path="admin/model/sale/order.php">
+		<operation error="skip">
+			<search position="replace"><![CDATA[$mail->send();]]></search>
+			<add position="replace"><![CDATA[
+			if (in_array($data['order_status_id'], (array) $this->config->get('pdf_invoice_auto_notify'))) {
+				$this->load->model('tool/pdf_invoice');
+				$temp_pdf = $this->model_tool_pdf_invoice->generate($order_id, 'file', 'invoice');
+				$mail->addAttachment($temp_pdf);
+			}
+			
+			$mail->send();
+			
+			if (isset($temp_pdf) && is_file($temp_pdf)) {
+				unlink($temp_pdf);
+			}
+			]]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/view/template/common/header.tpl" error="skip" v="1.5">
+		<operation error="skip">
+			<search position="after"><![CDATA[<li><a href="<?php echo $feed; ?>">]]></search>
+			<add position="after"><![CDATA[
+			<?php $this->load->model('setting/extension'); if(in_array('pdf_invoice_lite', $this->model_setting_extension->getInstalled('module'))){ ?>
+			<li><a href="<?php echo $this->url->link('module/pdf_invoice_lite', 'token=' . $this->session->data['token'], 'SSL'); ?>"><img style="vertical-align:top" src="view/pdf_invoice_pro/img/icon.png"/> PDF Invoice Lite</a></li>
+			<?php }else{ ?>
+			<li><a href="<?php echo $this->url->link('extension/module/install', 'extension=pdf_invoice_lite&token=' . $this->session->data['token'], 'SSL'); ?>"><img style="vertical-align:top" src="view/pdf_invoice_pro/img/icon.png"/> Install PDF Invoice Lite</a></li>
+			<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+  
+	<file path="admin/controller/common/menu.php" error="skip" v="2.0">
+		<operation error="skip">
+			<search position="after"><![CDATA[$this->load->language('common/menu');]]></search>
+			<add position="after"><![CDATA[
+			$this->load->model('extension/extension');
+			if (in_array('pdf_invoice_lite', $this->model_extension_extension->getInstalled('module'))) {
+				$data['text_pdfinvlite'] = 'PDF Invoice Lite';
+				$data['link_pdfinvlite'] = $this->url->link('module/pdf_invoice_lite', 'token=' . $this->session->data['token'], 'SSL');
+			} else {
+				$data['text_pdfinvlite'] = 'Install PDF Invoice Lite';
+				$data['link_pdfinvlite'] = $this->url->link('extension/module/install', 'extension=pdf_invoice_lite&token=' . $this->session->data['token'], 'SSL');
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/view/template/common/menu.tpl" error="skip" v="2.0">
+		<operation error="skip">
+			<search position="after"><![CDATA[<li><a href="<?php echo $feed; ?>"><?php echo $text_feed; ?></a></li>]]></search>
+			<add position="after"><![CDATA[
+			<li><a href="<?php echo $link_pdfinvlite; ?>"><img style="vertical-align:top" src="view/pdf_invoice_pro/img/icon.png"/> <?php echo $text_pdfinvlite; ?></a></li>
+			]]></add>
+		</operation>
+	</file>
+
+</modification>

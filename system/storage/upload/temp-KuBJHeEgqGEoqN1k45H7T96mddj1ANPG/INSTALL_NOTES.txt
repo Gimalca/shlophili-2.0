@@ -1,0 +1,21 @@
+Easy vqmod package for all opencart versions, enjoy :]
+
+
+-----------------------------------------------------
+~             Install on opencart v2                ~
+-----------------------------------------------------
+
+- Go to Extension installer and select the package
+- Done
+
+If you have error on file_get_contents uppon installing, enter this url
+in your browser: http://[yourwebsite.com]/vqmod/install to terminate installation
+
+
+-----------------------------------------------------
+~           Install on opencart v1.5                ~
+-----------------------------------------------------
+
+- Upload content of "upload" folder to your website
+- Enter this url in your browser: http://[yourwebsite.com]/vqmod/install
+- Done

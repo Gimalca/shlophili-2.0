@@ -1,0 +1,30 @@
+---------- Date: 2016-08-02 22:51:03 ~ IP : ::1 ----------
+REQUEST URI : /
+MOD DETAILS:
+   modFile   : C:\localhost\www\shlophili2\vqmod/xml/menu_editor.xml
+   id        : Menu Editor
+   version   : 1.0
+   vqmver    : 2.X
+   author    : gun88
+
+File Name    : catalog/view/theme/*/template/common/header.tpl(0)
+VQModObject::applyMod - SEARCH NOT FOUND (ABORTING MOD): <li><a href="<?php echo $category['href']; ?>"><?php echo $category['name']; ?></a></li>
+
+----------------------------------------------------------------------
+
+
+---------- Date: 2016-08-02 22:51:03 ~ IP : ::1 ----------
+REQUEST URI : /
+MOD DETAILS:
+   modFile   : C:\localhost\www\shlophili2\vqmod/xml/menu_editor.xml
+   id        : Menu Editor
+   version   : 1.0
+   vqmver    : 2.X
+   author    : gun88
+
+File Name    : catalog/view/theme/*/template/common/header.tpl(0)
+VQModObject::applyMod - SEARCH NOT FOUND (ABORTING MOD): <li><a href="<?php echo $category['href']; ?>"><?php echo $category['name']; ?></a></li>
+
+----------------------------------------------------------------------
+
+
