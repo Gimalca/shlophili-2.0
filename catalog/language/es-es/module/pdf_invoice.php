@@ -1,14 +1,14 @@
 <?php
 // Modulo
-$_['text_pdf_invoice'] = 'Descargar factura';
+$_['text_pdf_invoice'] = 'Descargar cotización';
 
 // Template
 $_['pdf_date_format'] = 'd/m/Y';
 $_['direction'] = 'ltr';
 $_['decimal_point'] = ',';
 $_['thousand_point'] = ' ';
-$_['text_invoice'] = 'Factura';
-$_['text_proformat'] = 'Factura proforma';
+$_['text_invoice'] = 'cotización';
+$_['text_proformat'] = 'Cotización proforma';
 $_['text_packingslip'] = 'Hoja de embalaje';
 $_['text_store_vat'] = 'NIF:';
 $_['text_store_company'] = 'ID de empresa:';
@@ -16,7 +16,7 @@ $_['text_url'] = 'URL:';
 $_['text_company_id'] = 'ID de empresa:';
 $_['text_tax_id'] = 'NIF:';
 $_['text_order_detail'] = 'Detalles';
-$_['text_invoice_no'] = 'Factura N°:';
+$_['text_invoice_no'] = 'Cotización N°:';
 $_['text_order_id'] = 'Pedido N°:';
 $_['text_status'] = 'Estado:';
 $_['text_date_added'] = 'Fecha pedido:';
